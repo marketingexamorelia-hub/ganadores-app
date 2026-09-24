@@ -68,6 +68,12 @@
             width: auto;
             object-fit: contain;
         }
+
+        .box-caza-premios {
+            background-color: #fff3cd;
+            border: 1px solid #ffe69c;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body class="bg-light p-4">
@@ -269,7 +275,7 @@
                         @if(Auth::check() && Auth::user()->email !== 'exa@invitado.com')
                             <!-- Modal Editar para cada registro -->
                             <div class="modal fade" id="modalEditar{{ $ganador->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog">
+                                <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <form action="{{ route('ganadores.update', $ganador->id) }}" method="POST">
                                             @csrf
@@ -307,24 +313,28 @@
                                                         <input type="date" name="fecha_entrega" class="form-control" value="{{ $ganador->fecha_entrega }}">
                                                     </div>
                                                 </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-bold">Programa</label>
-                                                    <input type="text" name="programa" class="form-control" value="{{ $ganador->programa }}">
+                                                <div class="row">
+                                                    <div class="col-md-4 mb-3">
+                                                        <label class="form-label fw-bold">Programa</label>
+                                                        <input type="text" name="programa" class="form-control" value="{{ $ganador->programa }}">
+                                                    </div>
+                                                    <div class="col-md-4 mb-3">
+                                                        <label class="form-label fw-bold">Premio</label>
+                                                        <input type="text" name="premio" class="form-control" value="{{ $ganador->premio }}">
+                                                    </div>
+                                                    <div class="col-md-4 mb-3">
+                                                        <label class="form-label fw-bold">Patrocinador</label>
+                                                        <input type="text" name="patrocinador" class="form-control" value="{{ $ganador->patrocinador }}">
+                                                    </div>
                                                 </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-bold">Premio</label>
-                                                    <input type="text" name="premio" class="form-control" value="{{ $ganador->premio }}">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-bold">Patrocinador</label>
-                                                    <input type="text" name="patrocinador" class="form-control" value="{{ $ganador->patrocinador }}">
-                                                </div>
-                                                <div class="form-check mb-3">
-                                                    <input type="hidden" name="caza_premios" value="0">
-                                                    <input type="checkbox" name="caza_premios" class="form-check-input" id="caza_premios_edit_{{ $ganador->id }}" value="1" {{ $ganador->caza_premios ? 'checked' : '' }}>
-                                                    <label class="form-check-label fw-bold text-danger" for="caza_premios_edit_{{ $ganador->id }}">
-                                                        Marcar como Caza Premios
-                                                    </label>
+                                                <div class="box-caza-premios p-3 mb-2">
+                                                    <div class="form-check form-switch d-flex align-items-center gap-2">
+                                                        <input type="hidden" name="caza_premios" value="0">
+                                                        <input class="form-check-input" type="checkbox" name="caza_premios" id="caza_premios_edit_{{ $ganador->id }}" value="1" {{ $ganador->caza_premios ? 'checked' : '' }}>
+                                                        <label class="form-check-label fw-bold text-dark cursor-pointer" for="caza_premios_edit_{{ $ganador->id }}">
+                                                            ⚠️ Marcar como Caza Premios
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
@@ -360,34 +370,34 @@
     </div>
 
     @if(Auth::check() && Auth::user()->email !== 'exa@invitado.com')
-        <!-- Modal: Nuevo Ganador -->
+        <!-- Modal: Nuevo Ganador (Optimizado Horizontal) -->
         <div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <form action="{{ route('ganadores.store') }}" method="POST">
                         @csrf
                         <div class="modal-header bg-success text-white">
-                            <h5 class="modal-title fw-bold">+ Registrar Nuevo Ganador</h5>
+                            <h5 class="modal-title fw-bold">➕ Registrar Nuevo Ganador</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Nombre *</label>
-                                <input type="text" name="nombre" class="form-control" required>
+                                <label class="form-label fw-bold">Nombre Completo *</label>
+                                <input type="text" name="nombre" class="form-control" placeholder="Ej: Juan Pérez" required>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">Edad</label>
-                                    <input type="number" name="edad" class="form-control">
+                                    <input type="number" name="edad" class="form-control" placeholder="Ej: 25">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">WhatsApp</label>
-                                    <input type="text" name="whatsapp" class="form-control">
+                                    <input type="text" name="whatsapp" class="form-control" placeholder="Ej: 4431234567">
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Facebook ID</label>
-                                <input type="text" name="facebook_id" class="form-control">
+                                <label class="form-label fw-bold">Facebook ID / Perfil</label>
+                                <input type="text" name="facebook_id" class="form-control" placeholder="Ej: juan.perez">
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -399,24 +409,28 @@
                                     <input type="date" name="fecha_entrega" class="form-control">
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Programa</label>
-                                <input type="text" name="programa" class="form-control">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Programa</label>
+                                    <input type="text" name="programa" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Participando por (Premio)</label>
+                                    <input type="text" name="premio" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Patrocinador</label>
+                                    <input type="text" name="patrocinador" class="form-control">
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Premio</label>
-                                <input type="text" name="premio" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Patrocinador</label>
-                                <input type="text" name="patrocinador" class="form-control">
-                            </div>
-                            <div class="form-check mb-3">
-                                <input type="hidden" name="caza_premios" value="0">
-                                <input type="checkbox" name="caza_premios" class="form-check-input" id="caza_premios_create" value="1">
-                                <label class="form-check-label fw-bold text-danger" for="caza_premios_create">
-                                    Marcar como Caza Premios
-                                </label>
+                            <div class="box-caza-premios p-3 mb-2">
+                                <div class="form-check form-switch d-flex align-items-center gap-2">
+                                    <input type="hidden" name="caza_premios" value="0">
+                                    <input class="form-check-input" type="checkbox" name="caza_premios" id="caza_premios_create" value="1">
+                                    <label class="form-check-label fw-bold text-dark cursor-pointer" for="caza_premios_create">
+                                        ⚠️ Marcar como Caza Premios
+                                    </label>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
