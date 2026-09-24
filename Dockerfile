@@ -9,9 +9,10 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     git \
-    unzip \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql gd zip bcmath ctl mbstring xml
+    unzip
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql gd zip bcmath ctype mbstring xml
 
 WORKDIR /var/www/html
 COPY . .
