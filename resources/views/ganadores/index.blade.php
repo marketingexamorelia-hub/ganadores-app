@@ -7,6 +7,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
+        html, body {
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #f8f9fa;
+        }
+
         /* Estilos del Sidebar deslizable */
         #sidebar {
             width: 280px;
@@ -76,7 +84,7 @@
         }
     </style>
 </head>
-<body class="bg-light p-4">
+<body class="p-0 m-0">
 
     {{-- LA BARRA LATERAL SOLO SE RENDERIZA SI NO ES INVITADO --}}
     @if(Auth::check() && Auth::user()->email !== 'exa@invitado.com')
@@ -106,8 +114,8 @@
         </div>
     @endif
 
-    <!-- Contenido Principal -->
-    <div class="container-fluid bg-white p-4 rounded shadow-sm">
+    <!-- Contenido Principal - Ocupa 100% real sin márgenes extraños -->
+    <div class="container-fluid px-3 py-3 bg-white shadow-none w-100" style="min-height: 100vh;">
         
         <!-- Header Principal -->
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2 border-bottom pb-3">
@@ -138,11 +146,12 @@
                     📊 Excel
                 </a>
 
-                @if(Auth::check() && Auth::user()->email !== 'exa@invitado.com')
+                @auth
+                    <!-- Habilitado para todos los usuarios autenticados (incluyendo invitado) -->
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCrear">
                         + Nuevo Registro
                     </button>
-                @endif
+                @endauth
                 
                 @auth
                     <form method="POST" action="{{ route('logout') }}" class="d-inline">
@@ -214,9 +223,9 @@
             </div>
         </div>
 
-        <!-- Tabla de Registros -->
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle">
+        <!-- Tabla de Registros w-100 -->
+        <div class="table-responsive w-100">
+            <table class="table table-bordered table-hover align-middle w-100 m-0">
                 <thead>
                     <tr>
                         <th class="text-center">#</th>
@@ -275,7 +284,7 @@
                         @if(Auth::check() && Auth::user()->email !== 'exa@invitado.com')
                             <!-- Modal Editar para cada registro -->
                             <div class="modal fade" id="modalEditar{{ $ganador->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-lg">
+                                <div class="modal-dialog modal-xl">
                                     <div class="modal-content">
                                         <form action="{{ route('ganadores.update', $ganador->id) }}" method="POST">
                                             @csrf
@@ -285,44 +294,42 @@
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-bold">Nombre</label>
-                                                    <input type="text" name="nombre" class="form-control" value="{{ $ganador->nombre }}" required>
-                                                </div>
                                                 <div class="row">
-                                                    <div class="col-md-6 mb-3">
+                                                    <div class="col-md-4 mb-3">
+                                                        <label class="form-label fw-bold">Nombre</label>
+                                                        <input type="text" name="nombre" class="form-control" value="{{ $ganador->nombre }}" required>
+                                                    </div>
+                                                    <div class="col-md-2 mb-3">
                                                         <label class="form-label fw-bold">Edad</label>
                                                         <input type="number" name="edad" class="form-control" value="{{ $ganador->edad }}">
                                                     </div>
-                                                    <div class="col-md-6 mb-3">
+                                                    <div class="col-md-3 mb-3">
                                                         <label class="form-label fw-bold">WhatsApp</label>
                                                         <input type="text" name="whatsapp" class="form-control" value="{{ $ganador->whatsapp }}">
                                                     </div>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-bold">Facebook ID</label>
-                                                    <input type="text" name="facebook_id" class="form-control" value="{{ $ganador->facebook_id }}">
+                                                    <div class="col-md-3 mb-3">
+                                                        <label class="form-label fw-bold">Facebook ID</label>
+                                                        <input type="text" name="facebook_id" class="form-control" value="{{ $ganador->facebook_id }}">
+                                                    </div>
                                                 </div>
                                                 <div class="row">
-                                                    <div class="col-md-6 mb-3">
+                                                    <div class="col-md-3 mb-3">
                                                         <label class="form-label fw-bold">Fecha Dinámica</label>
                                                         <input type="date" name="fecha_dinamica" class="form-control" value="{{ $ganador->fecha_dinamica }}">
                                                     </div>
-                                                    <div class="col-md-6 mb-3">
+                                                    <div class="col-md-3 mb-3">
                                                         <label class="form-label fw-bold">Fecha Entrega</label>
                                                         <input type="date" name="fecha_entrega" class="form-control" value="{{ $ganador->fecha_entrega }}">
                                                     </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-4 mb-3">
+                                                    <div class="col-md-2 mb-3">
                                                         <label class="form-label fw-bold">Programa</label>
                                                         <input type="text" name="programa" class="form-control" value="{{ $ganador->programa }}">
                                                     </div>
-                                                    <div class="col-md-4 mb-3">
+                                                    <div class="col-md-2 mb-3">
                                                         <label class="form-label fw-bold">Premio</label>
                                                         <input type="text" name="premio" class="form-control" value="{{ $ganador->premio }}">
                                                     </div>
-                                                    <div class="col-md-4 mb-3">
+                                                    <div class="col-md-2 mb-3">
                                                         <label class="form-label fw-bold">Patrocinador</label>
                                                         <input type="text" name="patrocinador" class="form-control" value="{{ $ganador->patrocinador }}">
                                                     </div>
@@ -369,10 +376,10 @@
 
     </div>
 
-    @if(Auth::check() && Auth::user()->email !== 'exa@invitado.com')
-        <!-- Modal: Nuevo Ganador (Optimizado Horizontal) -->
+    <!-- Modal: Nuevo Ganador (Fuera de la restricción del invitado para que puedan usarlo) -->
+    @auth
         <div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <form action="{{ route('ganadores.store') }}" method="POST">
                         @csrf
@@ -381,44 +388,42 @@
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Nombre Completo *</label>
-                                <input type="text" name="nombre" class="form-control" placeholder="Ej: Juan Pérez" required>
-                            </div>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Nombre Completo *</label>
+                                    <input type="text" name="nombre" class="form-control" placeholder="Ej: Juan Pérez" required>
+                                </div>
+                                <div class="col-md-2 mb-3">
                                     <label class="form-label fw-bold">Edad</label>
                                     <input type="number" name="edad" class="form-control" placeholder="Ej: 25">
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-3 mb-3">
                                     <label class="form-label fw-bold">WhatsApp</label>
                                     <input type="text" name="whatsapp" class="form-control" placeholder="Ej: 4431234567">
                                 </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Facebook ID / Perfil</label>
-                                <input type="text" name="facebook_id" class="form-control" placeholder="Ej: juan.perez">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label fw-bold">Facebook ID / Perfil</label>
+                                    <input type="text" name="facebook_id" class="form-control" placeholder="Ej: juan.perez">
+                                </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-3 mb-3">
                                     <label class="form-label fw-bold">Fecha Dinámica</label>
                                     <input type="date" name="fecha_dinamica" class="form-control">
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-3 mb-3">
                                     <label class="form-label fw-bold">Fecha Entrega</label>
                                     <input type="date" name="fecha_entrega" class="form-control">
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-2 mb-3">
                                     <label class="form-label fw-bold">Programa</label>
                                     <input type="text" name="programa" class="form-control">
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label fw-bold">Participando por (Premio)</label>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label fw-bold">Premio</label>
                                     <input type="text" name="premio" class="form-control">
                                 </div>
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-2 mb-3">
                                     <label class="form-label fw-bold">Patrocinador</label>
                                     <input type="text" name="patrocinador" class="form-control">
                                 </div>
@@ -441,8 +446,10 @@
                 </div>
             </div>
         </div>
+    @endauth
 
-        <!-- Modal: Eliminar Registros por Año -->
+    @if(Auth::check() && Auth::user()->email !== 'exa@invitado.com')
+        <!-- Modal: Eliminar Registros por Año (Solo Admin) -->
         <div class="modal fade" id="modalEliminarAno" tabindex="-1" aria-labelledby="modalEliminarAnoLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
