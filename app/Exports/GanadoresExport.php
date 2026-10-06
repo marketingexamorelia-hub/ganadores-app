@@ -91,7 +91,7 @@ class GanadoresExport extends DefaultValueBinder implements FromCollection, With
             $rowNumber = $index + 2;
             $colorHex = null;
 
-            // Evaluamos las condiciones de los estados (puedes ajustar el orden de prioridad)
+            // Evaluamos las condiciones de los estados
             $rawCaza = $g->getRawOriginal('caza_premios') ?? $g->caza_premios;
             $esCaza = ($rawCaza == 1 || $rawCaza === true || $rawCaza === '1' || strtolower((string)$rawCaza) === 'true');
 
@@ -111,7 +111,7 @@ class GanadoresExport extends DefaultValueBinder implements FromCollection, With
                       ->getFill()
                       ->setFillType(Fill::FILL_SOLID)
                       ->getStartColor()
-                      ->setARGB('FF' . $colorHex); // El prefijo 'FF' indica opacidad completa
+                      ->setARGB('FF' . $colorHex);
             }
         }
 

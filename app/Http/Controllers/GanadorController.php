@@ -128,12 +128,14 @@ class GanadorController extends Controller
      */
     public function destroyPorAno(Request $request)
     {
+        // Validar que se reciba el año
         $request->validate([
             'ano' => 'required|numeric|digits:4',
         ]);
 
         $ano = $request->input('ano');
 
+        // Elimina los registros cuyo año en fecha_dinamica o fecha_entrega coincida
         $eliminados = Ganador::whereYear('fecha_dinamica', $ano)
             ->orWhereYear('fecha_entrega', $ano)
             ->delete();
