@@ -48,7 +48,7 @@
             display: block;
         }
 
-        /* Tabla y colores dinámicos */
+        /* Tabla y colores de filas */
         .table > thead > tr > th {
             background-color: #8d6e63 !important;
             color: #ffffff !important;
@@ -61,17 +61,22 @@
             color: #0b4e22;
         }
 
-        /* Caza Premios en Rojo */
         .table > tbody > tr.fila-caza-premios > td {
             background-color: #f8d7da !important;
             color: #842029;
         }
 
-        /* Alerta en Amarillo Fosforescente */
         .table > tbody > tr.fila-alerta > td {
-            background-color: #ffea00 !important;
+            background-color: #ffeb3b !important;
             color: #000000 !important;
             font-weight: 500;
+        }
+
+        /* Color de fondo naranja, texto en negro y negrita para Premio Especial */
+        .table > tbody > tr.fila-premio-especial > td {
+            background-color: #f26a36 !important;
+            color: #000000 !important;
+            font-weight: bold !important;
         }
 
         .header-logo {
@@ -80,6 +85,7 @@
             object-fit: contain;
         }
 
+        /* Cajas de marcadores en tono bajo dentro del modal */
         .box-caza-premios {
             background-color: #f8d7da;
             border: 1px solid #f5c2c7;
@@ -90,6 +96,24 @@
             background-color: #fff9c4;
             border: 1px solid #ffee58;
             border-radius: 8px;
+        }
+
+        .box-premio-especial {
+            background-color: #d1e7dd;
+            border: 1px solid #badbcc;
+            border-radius: 8px;
+        }
+
+        /* Botón desplegable de Marcadores en Verde Bajo */
+        .btn-desplegable-marcador {
+            background-color: #d1e7dd;
+            border: 1px solid #badbcc;
+            color: #0f5132 !important;
+        }
+        .btn-desplegable-marcador:hover {
+            background-color: #bcd0c7;
+            border-color: #a3c2b4;
+            color: #0f5132 !important;
         }
 
         .cursor-pointer {
@@ -251,14 +275,14 @@
                         <th>Participando por</th>
                         <th>Patrocinador</th>
                         
-                        @if(Auth::check() && Auth::user()->email !== 'exa@invitado.com')
+                        @auth
                             <th class="text-center">Acciones</th>
-                        @endif
+                        @endauth
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($ganadores as $ganador)
-                        <tr class="{{ $ganador->fecha_entrega ? 'fila-entregado' : '' }} {{ $ganador->caza_premios ? 'fila-caza-premios' : '' }} {{ $ganador->alerta ? 'fila-alerta' : '' }}">
+                        <tr class="{{ $ganador->fecha_entrega ? 'fila-entregado' : '' }} {{ $ganador->caza_premios ? 'fila-caza-premios' : '' }} {{ $ganador->alerta ? 'fila-alerta' : '' }} {{ $ganador->premio_especial ? 'fila-premio-especial' : '' }}">
                             <td class="text-center fw-bold">{{ $ganador->id }}</td>
                             
                             <td>
@@ -273,6 +297,12 @@
                                 @if($ganador->alerta)
                                     <span class="badge bg-dark text-warning border border-warning ms-1" title="Marcado con Alerta">
                                         🚨 Alerta
+                                    </span>
+                                @endif
+
+                                @if($ganador->premio_especial)
+                                    <span class="badge bg-dark text-white border border-light ms-1" title="Premio Especial">
+                                        🎁 Premio Especial
                                     </span>
                                 @endif
                             </td>
@@ -290,16 +320,28 @@
                             <td>{{ $ganador->premio ?? '-' }}</td>
                             <td>{{ $ganador->patrocinador ?? '-' }}</td>
                             
-                            @if(Auth::check() && Auth::user()->email !== 'exa@invitado.com')
+                            @auth
                                 <td class="text-center">
-                                    <button type="button" class="btn btn-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalEditar{{ $ganador->id }}">
-                                        Editar
-                                    </button>
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <!-- Botón Editar -->
+                                        <button type="button" class="btn btn-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalEditar{{ $ganador->id }}" title="Editar">
+                                            Editar
+                                        </button>
+
+                                        <!-- Botón Borrar Registro Individual (Disponible para Admin e Invitado) -->
+                                        <form action="{{ route('ganadores.destroy', $ganador->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de eliminar este registro?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm fw-bold" title="Eliminar registro">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
-                            @endif
+                            @endauth
                         </tr>
 
-                        @if(Auth::check() && Auth::user()->email !== 'exa@invitado.com')
+                        @auth
                             <!-- Modal Editar para cada registro -->
                             <div class="modal fade" id="modalEditar{{ $ganador->id }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-xl">
@@ -353,27 +395,53 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- Opciones de Caza Premios y Alerta -->
-                                                <div class="row">
-                                                    <div class="col-md-6 mb-2">
-                                                        <div class="box-caza-premios p-3 h-100">
-                                                            <div class="form-check form-switch d-flex align-items-center gap-2">
-                                                                <input type="hidden" name="caza_premios" value="0">
-                                                                <input class="form-check-input" type="checkbox" name="caza_premios" id="caza_premios_edit_{{ $ganador->id }}" value="1" {{ $ganador->caza_premios ? 'checked' : '' }}>
-                                                                <label class="form-check-label fw-bold text-danger cursor-pointer" for="caza_premios_edit_{{ $ganador->id }}">
-                                                                    ⚠️ Marcar como Caza Premios
-                                                                </label>
+                                                <!-- Botón desplegable para Marcadores en Editar -->
+                                                <div class="mb-3">
+                                                    <a class="btn btn-desplegable-marcador btn-sm d-flex justify-content-between align-items-center fw-bold" 
+                                                       data-bs-toggle="collapse" 
+                                                       href="#seccionMarcadoresEditar{{ $ganador->id }}" 
+                                                       role="button" 
+                                                       aria-expanded="false" 
+                                                       aria-controls="seccionMarcadoresEditar{{ $ganador->id }}">
+                                                        <span>🏷️ Marcadores</span>
+                                                        <span class="fs-6">▼</span>
+                                                    </a>
+                                                </div>
+
+                                                <!-- Contenido desplegable de Marcadores en Editar -->
+                                                <div class="collapse mb-3" id="seccionMarcadoresEditar{{ $ganador->id }}">
+                                                    <div class="row">
+                                                        <div class="col-md-4 mb-2">
+                                                            <div class="box-caza-premios p-3 h-100">
+                                                                <div class="form-check form-switch d-flex align-items-center gap-2">
+                                                                    <input type="hidden" name="caza_premios" value="0">
+                                                                    <input class="form-check-input" type="checkbox" name="caza_premios" id="caza_premios_edit_{{ $ganador->id }}" value="1" {{ $ganador->caza_premios ? 'checked' : '' }}>
+                                                                    <label class="form-check-label fw-bold text-danger cursor-pointer" for="caza_premios_edit_{{ $ganador->id }}">
+                                                                        ⚠️ Caza Premios
+                                                                    </label>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="col-md-6 mb-2">
-                                                        <div class="box-alerta p-3 h-100">
-                                                            <div class="form-check form-switch d-flex align-items-center gap-2">
-                                                                <input type="hidden" name="alerta" value="0">
-                                                                <input class="form-check-input" type="checkbox" name="alerta" id="alerta_edit_{{ $ganador->id }}" value="1" {{ $ganador->alerta ? 'checked' : '' }}>
-                                                                <label class="form-check-label fw-bold text-dark cursor-pointer" for="alerta_edit_{{ $ganador->id }}">
-                                                                    🚨 Marcar con Alerta
-                                                                </label>
+                                                        <div class="col-md-4 mb-2">
+                                                            <div class="box-alerta p-3 h-100">
+                                                                <div class="form-check form-switch d-flex align-items-center gap-2">
+                                                                    <input type="hidden" name="alerta" value="0">
+                                                                    <input class="form-check-input" type="checkbox" name="alerta" id="alerta_edit_{{ $ganador->id }}" value="1" {{ $ganador->alerta ? 'checked' : '' }}>
+                                                                    <label class="form-check-label fw-bold text-dark cursor-pointer" for="alerta_edit_{{ $ganador->id }}">
+                                                                        🚨 Alerta
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4 mb-2">
+                                                            <div class="box-premio-especial p-3 h-100">
+                                                                <div class="form-check form-switch d-flex align-items-center gap-2">
+                                                                    <input type="hidden" name="premio_especial" value="0">
+                                                                    <input class="form-check-input" type="checkbox" name="premio_especial" id="premio_especial_edit_{{ $ganador->id }}" value="1" {{ $ganador->premio_especial ? 'checked' : '' }}>
+                                                                    <label class="form-check-label fw-bold cursor-pointer text-success" for="premio_especial_edit_{{ $ganador->id }}">
+                                                                        🎁 Premio Especial
+                                                                    </label>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -388,11 +456,11 @@
                                     </div>
                                 </div>
                             </div>
-                        @endif
+                        @endauth
 
                     @empty
                         <tr>
-                            <td colspan="{{ (Auth::check() && Auth::user()->email === 'exa@invitado.com') ? '10' : '11' }}" class="text-center text-muted py-4">
+                            <td colspan="11" class="text-center text-muted py-4">
                                 @if(request('search'))
                                     No se encontraron resultados para "{{ request('search') }}".
                                 @else
@@ -465,27 +533,53 @@
                                 </div>
                             </div>
 
-                            <!-- Opciones de Caza Premios y Alerta al Crear -->
-                            <div class="row">
-                                <div class="col-md-6 mb-2">
-                                    <div class="box-caza-premios p-3 h-100">
-                                        <div class="form-check form-switch d-flex align-items-center gap-2">
-                                            <input type="hidden" name="caza_premios" value="0">
-                                            <input class="form-check-input" type="checkbox" name="caza_premios" id="caza_premios_create" value="1">
-                                            <label class="form-check-label fw-bold text-danger cursor-pointer" for="caza_premios_create">
-                                                ⚠️️ Marcar como Caza Premios
-                                            </label>
+                            <!-- Botón desplegable para Marcadores en Crear -->
+                            <div class="mb-3">
+                                <a class="btn btn-desplegable-marcador btn-sm d-flex justify-content-between align-items-center fw-bold" 
+                                   data-bs-toggle="collapse" 
+                                   href="#seccionMarcadoresCrear" 
+                                   role="button" 
+                                   aria-expanded="false" 
+                                   aria-controls="seccionMarcadoresCrear">
+                                    <span>🏷️ Marcadores</span>
+                                    <span class="fs-6">▼</span>
+                                </a>
+                            </div>
+
+                            <!-- Contenido desplegable de Marcadores en Crear -->
+                            <div class="collapse mb-3" id="seccionMarcadoresCrear">
+                                <div class="row">
+                                    <div class="col-md-4 mb-2">
+                                        <div class="box-caza-premios p-3 h-100">
+                                            <div class="form-check form-switch d-flex align-items-center gap-2">
+                                                <input type="hidden" name="caza_premios" value="0">
+                                                <input class="form-check-input" type="checkbox" name="caza_premios" id="caza_premios_create" value="1">
+                                                <label class="form-check-label fw-bold text-danger cursor-pointer" for="caza_premios_create">
+                                                    ⚠️ Caza Premios
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6 mb-2">
-                                    <div class="box-alerta p-3 h-100">
-                                        <div class="form-check form-switch d-flex align-items-center gap-2">
-                                            <input type="hidden" name="alerta" value="0">
-                                            <input class="form-check-input" type="checkbox" name="alerta" id="alerta_create" value="1">
-                                            <label class="form-check-label fw-bold text-dark cursor-pointer" for="alerta_create">
-                                                🚨 Marcar con Alerta
-                                            </label>
+                                    <div class="col-md-4 mb-2">
+                                        <div class="box-alerta p-3 h-100">
+                                            <div class="form-check form-switch d-flex align-items-center gap-2">
+                                                <input type="hidden" name="alerta" value="0">
+                                                <input class="form-check-input" type="checkbox" name="alerta" id="alerta_create" value="1">
+                                                <label class="form-check-label fw-bold text-dark cursor-pointer" for="alerta_create">
+                                                    🚨 Alerta
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <div class="box-premio-especial p-3 h-100">
+                                            <div class="form-check form-switch d-flex align-items-center gap-2">
+                                                <input type="hidden" name="premio_especial" value="0">
+                                                <input class="form-check-input" type="checkbox" name="premio_especial" id="premio_especial_create" value="1">
+                                                <label class="form-check-label fw-bold cursor-pointer text-success" for="premio_especial_create">
+                                                    🎁 Premio Especial
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -560,7 +654,6 @@
             }
         }
     </script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

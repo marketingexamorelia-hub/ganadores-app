@@ -44,21 +44,29 @@ class GanadorController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre'         => 'required|string|max:255',
-            'edad'           => 'nullable|integer',
-            'whatsapp'       => 'nullable|string|max:20',
-            'facebook_id'    => 'nullable|string|max:255',
-            'fecha_dinamica' => 'nullable|date',
-            'fecha_entrega'  => 'nullable|date',
-            'programa'       => 'nullable|string|max:255',
-            'premio'         => 'nullable|string|max:255',
-            'patrocinador'   => 'nullable|string|max:255',
-            'caza_premios'   => 'boolean',
-            'alerta'         => 'boolean',
+            'nombre'          => 'required|string|max:255',
+            'edad'            => 'nullable|integer',
+            'whatsapp'        => 'nullable|string|max:20',
+            'facebook_id'     => 'nullable|string|max:255',
+            'fecha_dinamica'  => 'nullable|date',
+            'fecha_entrega'   => 'nullable|date',
+            'programa'        => 'nullable|string|max:255',
+            'premio'          => 'nullable|string|max:255',
+            'patrocinador'    => 'nullable|string|max:255',
+            'caza_premios'    => 'boolean',
+            'alerta'          => 'boolean',
+            'premio_especial' => 'boolean', // <-- Agregado aquí
         ]);
 
-        // Asegurar exclusión mutua: si se marca alerta, se desmarca caza_premios
+        // Asegurar exclusión mutua: si se marca uno, se desactivan los demás
         if (!empty($validated['alerta'])) {
+            $validated['caza_premios'] = false;
+            $validated['premio_especial'] = false;
+        } elseif (!empty($validated['caza_premios'])) {
+            $validated['alerta'] = false;
+            $validated['premio_especial'] = false;
+        } elseif (!empty($validated['premio_especial'])) {
+            $validated['alerta'] = false;
             $validated['caza_premios'] = false;
         }
 
@@ -85,24 +93,30 @@ class GanadorController extends Controller
         $ganador = Ganador::findOrFail($id);
 
         $validated = $request->validate([
-            'nombre'         => 'required|string|max:255',
-            'edad'           => 'nullable|integer',
-            'whatsapp'       => 'nullable|string|max:20',
-            'facebook_id'    => 'nullable|string|max:255',
-            'fecha_dinamica' => 'nullable|date',
-            'fecha_entrega'  => 'nullable|date',
-            'programa'       => 'nullable|string|max:255',
-            'premio'         => 'nullable|string|max:255',
-            'patrocinador'   => 'nullable|string|max:255',
-            'caza_premios'   => 'boolean',
-            'alerta'         => 'boolean',
+            'nombre'          => 'required|string|max:255',
+            'edad'            => 'nullable|integer',
+            'whatsapp'        => 'nullable|string|max:20',
+            'facebook_id'     => 'nullable|string|max:255',
+            'fecha_dinamica'  => 'nullable|date',
+            'fecha_entrega'   => 'nullable|date',
+            'programa'        => 'nullable|string|max:255',
+            'premio'          => 'nullable|string|max:255',
+            'patrocinador'    => 'nullable|string|max:255',
+            'caza_premios'    => 'boolean',
+            'alerta'          => 'boolean',
+            'premio_especial' => 'boolean', // <-- Agregado aquí
         ]);
 
         // Asegurar exclusión mutua en actualizaciones
         if (!empty($validated['alerta'])) {
             $validated['caza_premios'] = false;
+            $validated['premio_especial'] = false;
         } elseif (!empty($validated['caza_premios'])) {
             $validated['alerta'] = false;
+            $validated['premio_especial'] = false;
+        } elseif (!empty($validated['premio_especial'])) {
+            $validated['alerta'] = false;
+            $validated['caza_premios'] = false;
         }
 
         $ganador->update($validated);
@@ -128,14 +142,12 @@ class GanadorController extends Controller
      */
     public function destroyPorAno(Request $request)
     {
-        // Validar que se reciba el año
         $request->validate([
             'ano' => 'required|numeric|digits:4',
         ]);
 
         $ano = $request->input('ano');
 
-        // Elimina los registros cuyo año en fecha_dinamica o fecha_entrega coincida
         $eliminados = Ganador::whereYear('fecha_dinamica', $ano)
             ->orWhereYear('fecha_entrega', $ano)
             ->delete();

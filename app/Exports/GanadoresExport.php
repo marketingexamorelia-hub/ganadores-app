@@ -87,22 +87,25 @@ class GanadoresExport extends DefaultValueBinder implements FromCollection, With
 
         // 2. Recorrer los registros para pintar dinámicamente cada fila
         foreach ($this->ganadores as $index => $g) {
-            // Como el encabezado ocupa la fila 1, los datos empiezan en la fila 2 ($index + 2)
             $rowNumber = $index + 2;
             $colorHex = null;
 
-            // Evaluamos las condiciones de los estados
+            // Evaluamos las condiciones de los estados de forma segura
             $rawCaza = $g->getRawOriginal('caza_premios') ?? $g->caza_premios;
             $esCaza = ($rawCaza == 1 || $rawCaza === true || $rawCaza === '1' || strtolower((string)$rawCaza) === 'true');
 
-            if (!empty($g->fecha_entrega)) {
-                $colorHex = 'DCF8C6'; // Verde claro (Entregado)
-            }
-            if ($esCaza) {
-                $colorHex = 'F8D7DA'; // Rojo suave / Rosado (Caza Premios)
-            }
+            $rawEspecial = $g->getRawOriginal('premio_especial') ?? $g->premio_especial;
+            $esEspecial = ($rawEspecial == 1 || $rawEspecial === true || $rawEspecial === '1' || strtolower((string)$rawEspecial) === 'true');
+
+            // Orden de prioridades para los colores en Excel
             if (!empty($g->alerta)) {
                 $colorHex = 'FFEA00'; // Amarillo fosforescente (Alerta)
+            } elseif ($esEspecial) {
+                $colorHex = '27F5C5'; // Verde Cian Fosforescente Intenso (Premio Especial)
+            } elseif ($esCaza) {
+                $colorHex = 'F8D7DA'; // Rojo suave (Caza Premios)
+            } elseif (!empty($g->fecha_entrega)) {
+                $colorHex = 'DCF8C6'; // Verde claro (Entregado)
             }
 
             // Si cumple con alguna condición, aplicamos el color a toda la fila (de la A a la K)
