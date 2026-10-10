@@ -15,14 +15,25 @@ class GanadorController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $search = trim($request->input('search'));
 
         $ganadores = Ganador::when($search, function ($query, $search) {
-            return $query->where('nombre', 'LIKE', "%{$search}%")
-                         ->orWhere('whatsapp', 'LIKE', "%{$search}%")
-                         ->orWhere('programa', 'LIKE', "%{$search}%")
-                         ->orWhere('premio', 'LIKE', "%{$search}%")
-                         ->orWhere('patrocinador', 'LIKE', "%{$search}%");
+            // Limpiar el término de búsqueda para WhatsApp (dejar solo dígitos)
+            $searchDigits = preg_replace('/\D/', '', $search);
+
+            return $query->where(function ($q) use ($search, $searchDigits) {
+                // 1. Búsqueda por Nombre (coincidencia parcial)
+                $q->where('nombre', 'LIKE', "%{$search}%")
+                  // 2. Búsqueda por Programa
+                  ->orWhere('programa', 'LIKE', "%{$search}%");
+
+                // 3. Búsqueda por WhatsApp ignorando espacios/guiones si el usuario ingresó números
+                if (!empty($searchDigits)) {
+                    $q->orWhereRaw("REPLACE(REPLACE(REPLACE(whatsapp, ' ', ''), '-', ''), '+', '') LIKE ?", ["%{$searchDigits}%"]);
+                } else {
+                    $q->orWhere('whatsapp', 'LIKE', "%{$search}%");
+                }
+            });
         })
         ->orderBy('id', 'desc')
         ->paginate(15);
