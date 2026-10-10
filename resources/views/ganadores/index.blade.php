@@ -283,7 +283,9 @@
                 <tbody>
                     @forelse($ganadores as $ganador)
                         <tr class="{{ $ganador->fecha_entrega ? 'fila-entregado' : '' }} {{ $ganador->caza_premios ? 'fila-caza-premios' : '' }} {{ $ganador->alerta ? 'fila-alerta' : '' }} {{ $ganador->premio_especial ? 'fila-premio-especial' : '' }}">
-                            <td class="text-center fw-bold">{{ $ganador->id }}</td>
+                            <td class="text-center fw-bold">
+    {{ $ganadores->total() - (($ganadores->currentPage() - 1) * $ganadores->perPage() + ($loop->iteration - 1)) }}
+</td>
                             
                             <td>
                                 {{ ($ganador->nombre && strtolower(trim($ganador->nombre)) !== 'sin nombre') ? $ganador->nombre : '-' }}
