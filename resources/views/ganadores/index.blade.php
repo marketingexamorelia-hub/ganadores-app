@@ -57,13 +57,14 @@
         }
 
         .table > tbody > tr.fila-entregado > td {
-            background-color: #dcf8c6 !important;
-            color: #0b4e22;
+            background-color: #85e085 !important;
+            color: #0b3d0b;
         }
 
         .table > tbody > tr.fila-caza-premios > td {
             background-color: #f8d7da !important;
             color: #842029;
+            font-weight: bold !important;
         }
 
         .table > tbody > tr.fila-alerta > td {
@@ -284,8 +285,8 @@
                     @forelse($ganadores as $ganador)
                         <tr class="{{ $ganador->fecha_entrega ? 'fila-entregado' : '' }} {{ $ganador->caza_premios ? 'fila-caza-premios' : '' }} {{ $ganador->alerta ? 'fila-alerta' : '' }} {{ $ganador->premio_especial ? 'fila-premio-especial' : '' }}">
                             <td class="text-center fw-bold">
-    {{ $ganadores->total() - (($ganadores->currentPage() - 1) * $ganadores->perPage() + ($loop->iteration - 1)) }}
-</td>
+                                {{ $ganadores->total() - (($ganadores->currentPage() - 1) * $ganadores->perPage() + ($loop->iteration - 1)) }}
+                            </td>
                             
                             <td>
                                 {{ ($ganador->nombre && strtolower(trim($ganador->nombre)) !== 'sin nombre') ? $ganador->nombre : '-' }}
